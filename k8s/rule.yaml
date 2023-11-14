@@ -1,0 +1,17 @@
+kind: AutoStoppingRule
+apiVersion: ccm.harness.io/v1
+metadata:
+  name: sample-rule-lab
+  namespace: default
+  annotations:
+    harness.io/cloud-connector-id: nknautostoptest
+spec:
+  service:
+    name: nginx-svc
+    port: 80
+  ingress:
+    controllerName: nginx
+    name: minimal-ingress
+  idleTimeMins: 15
+  hideProgressPage: false
+  enabled: true
