@@ -2,7 +2,7 @@
 resource "harness_autostopping_aws_proxy" "rdsconnectproxy" {
   name                   = "${var.name}-proxy"
   cloud_connector_id     = var.cloud_connector_id
-  host_name              = "${var.name}.autostopping.lightwingtest.com"
+  host_name              = "${var.name}.tools.harnessio.se"
   region                 = var.region
   vpc                    = var.vpc
   security_groups        = [aws_security_group.sgforproxy.id]
