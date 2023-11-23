@@ -1,7 +1,7 @@
 #!/bin/bash
 sudo apt-get update -y &&
 
-TOMCAT_URL="https://www-eu.apache.org/dist/tomcat/tomcat-8/v8.5.43/bin/apache-tomcat-8.5.43.tar.gz"
+TOMCAT_URL="https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.83/bin/apache-tomcat-9.0.83.tar.gz"
 
 function check_java_home {
     if [ -z ${JAVA_HOME} ]
@@ -22,7 +22,7 @@ echo 'Installing tomcat server...'
 echo 'Checking for JAVA_HOME...'
 check_java_home
 
-echo 'Downloading tomcat-8.5...'
+echo 'Downloading tomcat-9.0...'
 if [ ! -f /etc/apache-tomcat-8*tar.gz ]
 then
     curl -O $TOMCAT_URL
@@ -30,19 +30,19 @@ fi
 echo 'Finished downloading...'
 
 echo 'Creating install directories...'
-sudo mkdir -p '/opt/tomcat/8_5'
+sudo mkdir -p '/opt/tomcat/9_0'
 
-if [ -d "/opt/tomcat/8_5" ]
+if [ -d "/opt/tomcat/9_0" ]
 then
     echo 'Extracting binaries to install directory...'
-    sudo tar xzf apache-tomcat-8*tar.gz -C "/opt/tomcat/8_5" --strip-components=1
+    sudo tar xzf apache-tomcat-8*tar.gz -C "/opt/tomcat/9_0" --strip-components=1
     echo 'Creating tomcat user group...'
     sudo groupadd tomcat
     sudo useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat
     
     echo 'Setting file permissions...'
-    cd "/opt/tomcat/8_5"
-    sudo chgrp -R tomcat "/opt/tomcat/8_5"
+    cd "/opt/tomcat/9_0"
+    sudo chgrp -R tomcat "/opt/tomcat/9_0"
     sudo chmod -R g+r conf
     sudo chmod -R g+x conf
 
@@ -68,14 +68,14 @@ then
     echo "Type=forking" >> tomcat.service
 
     echo "Environment=JAVA_HOME=$JAVA_HOME" >> tomcat.service
-    echo "Environment=CATALINA_PID=/opt/tomcat/8_5/temp/tomcat.pid" >> tomcat.service
-    echo "Environment=CATALINA_HOME=/opt/tomcat/8_5" >> tomcat.service
-    echo "Environment=CATALINA_BASE=/opt/tomcat/8_5" >> tomcat.service
+    echo "Environment=CATALINA_PID=/opt/tomcat/9_0/temp/tomcat.pid" >> tomcat.service
+    echo "Environment=CATALINA_HOME=/opt/tomcat/9_0" >> tomcat.service
+    echo "Environment=CATALINA_BASE=/opt/tomcat/9_0" >> tomcat.service
     echo "Environment=CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC" >> tomcat.service
     echo "Environment=JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom" >> tomcat.service
 
-    echo "ExecStart=/opt/tomcat/8_5/bin/startup.sh" >> tomcat.service
-    echo "ExecStop=/opt/tomcat/8_5/bin/shutdown.sh" >> tomcat.service
+    echo "ExecStart=/opt/tomcat/9_0/bin/startup.sh" >> tomcat.service
+    echo "ExecStop=/opt/tomcat/9_0/bin/shutdown.sh" >> tomcat.service
 
     echo "User=tomcat" >> tomcat.service
     echo "Group=tomcat" >> tomcat.service
