@@ -38,6 +38,13 @@ variable "api_key" {
   default = "Set the env variable TF_VAR_api_key"
 }
 
+variable "key_name" {
+  description = "The key name to use for the instance"
+  type        = string
+  default     = ""
+}
+
+
 locals {
   tags = {
     lb_hostname = "${var.name}.tools.harnessio.se"
