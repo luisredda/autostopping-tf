@@ -51,6 +51,12 @@ then
 
     sudo chown -R tomcat webapps/ work/ temp/ logs/
 
+
+    #change the default port from 8080 to 80
+    echo 'Updating Tomcat default port to 80...'
+    sudo sed -i 's/<Connector port="8080"/<Connector port="80"/' conf/server.xml
+
+
     echo 'Setting up tomcat service...'
     sudo touch tomcat.service
     sudo chmod 777 tomcat.service 
