@@ -31,7 +31,7 @@ variable "account_id" {
 }
 variable "cloud_connector_id" {
   type    = string
-  default = "SE_AWS_CCM_Connector"
+  default = "ccmdemoaws"
 }
 variable "api_key" {
   type    = string
