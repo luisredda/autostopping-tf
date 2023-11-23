@@ -23,7 +23,7 @@ echo 'Checking for JAVA_HOME...'
 check_java_home
 
 echo 'Downloading tomcat-9.0...'
-if [ ! -f /etc/apache-tomcat-8*tar.gz ]
+if [ ! -f /etc/apache-tomcat-9*tar.gz ]
 then
     curl -O $TOMCAT_URL
 fi
@@ -35,7 +35,7 @@ sudo mkdir -p '/opt/tomcat/9_0'
 if [ -d "/opt/tomcat/9_0" ]
 then
     echo 'Extracting binaries to install directory...'
-    sudo tar xzf apache-tomcat-8*tar.gz -C "/opt/tomcat/9_0" --strip-components=1
+    sudo tar xzf apache-tomcat-9*tar.gz -C "/opt/tomcat/9_0" --strip-components=1
     echo 'Creating tomcat user group...'
     sudo groupadd tomcat
     sudo useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat
