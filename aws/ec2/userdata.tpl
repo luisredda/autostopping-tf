@@ -9,7 +9,7 @@ sudo yum install java-11-amazon-corretto-devel -y
 # Download and install Apache Tomcat 10.1.16
 wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz
 tar -xzvf apache-tomcat-10.1.16.tar.gz
-sudo mv apache-tomcat-10.1.16 /opt/tomcat/apache-tomcat-10.1.16
+sudo mv apache-tomcat-10.1.16 /opt/tomcat/
 
 # Create a new Tomcat user (optional but recommended)
 sudo groupadd tomcat
