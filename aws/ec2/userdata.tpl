@@ -1,99 +1,73 @@
 #!/bin/bash
-sudo apt-get update -y &&
 
-TOMCAT_URL="https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.83/bin/apache-tomcat-9.0.83.tar.gz"
+# Update the system
+sudo yum update -y
 
-function check_java_home {
-    if [ -z ${JAVA_HOME} ]
-    then
-        echo 'Could not find JAVA_HOME. Please install Java and set JAVA_HOME'
-	exit
-    else 
-	echo 'JAVA_HOME found: '$JAVA_HOME
-        if [ ! -e ${JAVA_HOME} ]
-        then
-	    echo 'Invalid JAVA_HOME. Make sure your JAVA_HOME path exists'
-	    exit
-        fi
-    fi
-}
+# Install Java 11 (Amazon Corretto)
+sudo yum install java-11-amazon-corretto-devel -y
 
-echo 'Installing tomcat server...'
-echo 'Checking for JAVA_HOME...'
-check_java_home
+# Download and install Apache Tomcat 10.1.16
+wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz
+tar -xzvf apache-tomcat-10.1.16.tar.gz
+sudo mv apache-tomcat-10.1.16 /opt/tomcat/apache-tomcat-10.1.16
 
-echo 'Downloading tomcat-9.0...'
-if [ ! -f /etc/apache-tomcat-9*tar.gz ]
-then
-    curl -O $TOMCAT_URL
-fi
-echo 'Finished downloading...'
+# Create a new Tomcat user (optional but recommended)
+sudo groupadd tomcat
+sudo useradd -s /bin/false -g tomcat -d /opt/tomcat/apache-tomcat-10.1.16 tomcat
 
-echo 'Creating install directories...'
-sudo mkdir -p '/opt/tomcat/9_0'
+# Set permissions
+sudo chown -R tomcat:tomcat /opt/tomcat/apache-tomcat-10.1.16
+sudo chmod -R g+r /opt/tomcat/apache-tomcat-10.1.16/conf
+sudo chmod g+x /opt/tomcat/apache-tomcat-10.1.16/conf
+sudo chmod -R g+r /opt/tomcat/apache-tomcat-10.1.16/webapps /opt/tomcat/apache-tomcat-10.1.16/work /opt/tomcat/apache-tomcat-10.1.16/temp /opt/tomcat/apache-tomcat-10.1.16/logs
 
-if [ -d "/opt/tomcat/9_0" ]
-then
-    echo 'Extracting binaries to install directory...'
-    sudo tar xzf apache-tomcat-9*tar.gz -C "/opt/tomcat/9_0" --strip-components=1
-    echo 'Creating tomcat user group...'
-    sudo groupadd tomcat
-    sudo useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat
-    
-    echo 'Setting file permissions...'
-    cd "/opt/tomcat/9_0"
-    sudo chgrp -R tomcat "/opt/tomcat/9_0"
-    sudo chmod -R g+r conf
-    sudo chmod -R g+x conf
+# Configure Tomcat to run on port 80
+sudo sed -i 's/Connector port="8080"/Connector port="80"/' /opt/tomcat/apache-tomcat-10.1.16/conf/server.xml
 
-    # This should be commented out on a production server
-    sudo chmod -R g+w conf
+# Create a simplified Tomcat startup script
+sudo tee /opt/tomcat/apache-tomcat-10.1.16/bin/startup.sh << 'EOF'
+#!/bin/bash
 
-    sudo chown -R tomcat webapps/ work/ temp/ logs/
+export CATALINA_HOME="/opt/tomcat/apache-tomcat-10.1.16"
+export CATALINA_BASE="/opt/tomcat/apache-tomcat-10.1.16"
+export CATALINA_PID="$CATALINA_BASE/temp/tomcat.pid"
+export JAVA_HOME="/usr/lib/jvm/java-11-amazon-corretto"
 
+"$CATALINA_HOME/bin/startup.sh"
+EOF
 
-    #change the default port from 8080 to 80
-    echo 'Updating Tomcat default port to 80...'
-    sudo sed -i 's/<Connector port="8080"/<Connector port="80"/' conf/server.xml
+# Make the startup script executable
+sudo chmod +x /opt/tomcat/apache-tomcat-10.1.16/bin/startup.sh
 
+# Enable and start Tomcat as a service
+sudo tee /etc/systemd/system/tomcat.service << EOF
+[Unit]
+Description=Apache Tomcat Web Application Container
+After=network.target
 
-    echo 'Setting up tomcat service...'
-    sudo touch tomcat.service
-    sudo chmod 777 tomcat.service 
-    echo "[Unit]" > tomcat.service
-    echo "Description=Apache Tomcat Web Application Container" >> tomcat.service
-    echo "After=network.target" >> tomcat.service
+[Service]
+Type=forking
 
-    echo "[Service]" >> tomcat.service
-    echo "Type=forking" >> tomcat.service
+Environment=JAVA_HOME=/usr/lib/jvm/java-11-amazon-corretto
+Environment=CATALINA_PID=/opt/tomcat/apache-tomcat-10.1.16/temp/tomcat.pid
+Environment=CATALINA_HOME=/opt/tomcat/apache-tomcat-10.1.16
+Environment=CATALINA_BASE=/opt/tomcat/apache-tomcat-10.1.16
 
-    echo "Environment=JAVA_HOME=$JAVA_HOME" >> tomcat.service
-    echo "Environment=CATALINA_PID=/opt/tomcat/9_0/temp/tomcat.pid" >> tomcat.service
-    echo "Environment=CATALINA_HOME=/opt/tomcat/9_0" >> tomcat.service
-    echo "Environment=CATALINA_BASE=/opt/tomcat/9_0" >> tomcat.service
-    echo "Environment=CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC" >> tomcat.service
-    echo "Environment=JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom" >> tomcat.service
+ExecStart=/opt/tomcat/apache-tomcat-10.1.16/bin/startup.sh
+ExecStop=/opt/tomcat/apache-tomcat-10.1.16/bin/shutdown.sh
 
-    echo "ExecStart=/opt/tomcat/9_0/bin/startup.sh" >> tomcat.service
-    echo "ExecStop=/opt/tomcat/9_0/bin/shutdown.sh" >> tomcat.service
+User=tomcat
+Group=tomcat
+RestartSec=10
+Restart=always
 
-    echo "User=tomcat" >> tomcat.service
-    echo "Group=tomcat" >> tomcat.service
-    echo "UMask=0007" >> tomcat.service
-    echo "RestartSec=10" >> tomcat.service
-    echo "Restart=always" >> tomcat.service
+[Install]
+WantedBy=multi-user.target
+EOF
 
-    echo "[Install]" >> tomcat.service
-    echo "WantedBy=multi-user.target" >> tomcat.service
+# Reload systemd manager configuration
+sudo systemctl daemon-reload
 
-    sudo mv tomcat.service /etc/systemd/system/tomcat.service
-    sudo chmod 755 /etc/systemd/system/tomcat.service
-    sudo systemctl daemon-reload
-    
-    echo 'Starting tomcat server....'
-    sudo systemctl start tomcat
-    exit
-else
-    echo 'Could not locate installation direcotry..exiting..'
-    exit
-fi
+# Start and enable Tomcat service
+sudo systemctl start tomcat
+sudo systemctl enable tomcat
