@@ -26,6 +26,14 @@ sudo chmod -R g+r /opt/tomcat/webapps /opt/tomcat/work /opt/tomcat/temp /opt/tom
 
 #sudo setcap 'cap_net_bind_service=+ep' "$JAVA_HOME/bin/java"
 
+# Add user and password configurations to tomcat-users.xml
+sudo bash -c 'cat << EOF >> /opt/tomcat/conf/tomcat-users.xml
+<tomcat-users>
+  <role rolename="manager-gui"/>
+  <user username="demoadmin" password="h@rnessAdmin2023" roles="manager-gui"/>
+</tomcat-users>
+EOF'
+
 # Make the startup script executable
 sudo chmod +x /opt/tomcat/bin/startup.sh
 
