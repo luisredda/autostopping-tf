@@ -22,9 +22,9 @@ sudo chmod g+x /opt/tomcat/conf
 sudo chmod -R g+r /opt/tomcat/webapps /opt/tomcat/work /opt/tomcat/temp /opt/tomcat/logs
 
 # Configure Tomcat to run on port 80
-sudo sed -i 's/Connector port="8080"/Connector port="80"/' /opt/tomcat/conf/server.xml
+#sudo sed -i 's/Connector port="8080"/Connector port="80"/' /opt/tomcat/conf/server.xml
 
-sudo setcap 'cap_net_bind_service=+ep' "$JAVA_HOME/bin/java"
+#sudo setcap 'cap_net_bind_service=+ep' "$JAVA_HOME/bin/java"
 
 # Make the startup script executable
 sudo chmod +x /opt/tomcat/bin/startup.sh
