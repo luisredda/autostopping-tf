@@ -22,12 +22,12 @@ resource "harness_autostopping_rule_vm" "rule" {
       source_protocol = "http"
       target_protocol = "http"
       source_port     = 80
-      target_port     = 80
+      target_port     = 8080
       action          = "forward"
     }
     health {
       protocol         = "http"
-      port             = 80
+      port             = 8080
       path             = "/"
       timeout          = 30
       status_code_from = 200
